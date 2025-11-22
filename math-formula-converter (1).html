@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学公式转换器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #475569;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .converter-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            animation: scaleIn 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 968px) {
+            .converter-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px var(--shadow);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .output-area {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-y: auto;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), #7c3aed);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            animation: slideUp 0.6s ease-out 0.4s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .info-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .example {
+            background: var(--bg-input);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .copy-notification.show {
+            transform: translateX(0);
+        }
+
+        .format-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .format-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .format-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .format-option label {
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .format-option input[type="radio"]:checked + label {
+            color: var(--primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>数学公式转换器</h1>
+            <p class="subtitle">轻松转换 LaTeX 格式的数学公式</p>
+        </header>
+
+        <div class="converter-container">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        输入文本
+                    </div>
+                </div>
+                <textarea 
+                    id="inputText" 
+                    placeholder="粘贴包含 LaTeX 格式公式的文本...&#10;&#10;例如：&#10;师：你说\(\frac{9}{10} \div 3 = \frac{9}{10} \times \frac{1}{3} = \frac{3}{10}\)。正确！&#10;&#10;将转换为：&#10;师：你说⁹⁄₁₀ ÷ 3 = ⁹⁄₁₀ × ¹⁄₃ = ³⁄₁₀。正确！"></textarea>
+                
+                <div class="format-options">
+                    <div class="format-option">
+                        <input type="radio" id="formatVertical" name="outputFormat" value="vertical" checked>
+                        <label for="formatVertical">竖式分数（⁹⁄₁₀）</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="radio" id="formatSlash" name="outputFormat" value="slash">
+                        <label for="formatSlash">斜杠格式（9/10）</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="radio" id="formatLatex" name="outputFormat" value="latex">
+                        <label for="formatLatex">LaTeX 格式</label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="convertText()">
+                        <span>转换</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">
+                        <span>清空</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        转换结果
+                    </div>
+                </div>
+                <div id="outputText" class="output-area">转换后的文本将显示在这里...</div>
+                <div class="button-group">
+                    <button class="btn-success" onclick="copyOutput()">
+                        <span>复制结果</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">📚 使用说明</div>
+            <div class="info-content">
+                <p><strong>支持的格式转换：</strong></p>
+                <div class="example">输入：师：你说\(\frac{9}{10} \div 3 = \frac{9}{10} \times \frac{1}{3} = \frac{3}{10}\)。正确！</div>
+                <div class="example">竖式输出：师：你说⁹⁄₁₀ ÷ 3 = ⁹⁄₁₀ × ¹⁄₃ = ³⁄₁₀。正确！</div>
+                <div class="example">斜杠输出：师：你说9/10 ÷ 3 = 9/10 × 1/3 = 3/10。正确！</div>
+                <br>
+                <div class="example">输入：师：你说\(\frac{3}{8} \div 2 = \frac{3}{8} \times \frac{1}{2} = \frac{3}{16}\)。非常好！</div>
+                <div class="example">竖式输出：师：你说⅜ ÷ 2 = ⅜ × ½ = ³⁄₁₆。非常好！</div>
+                <br>
+                <p><strong>竖式分数说明：</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>常用分数（½、⅓、¼、⅛ 等）使用专用 Unicode 字符</li>
+                    <li>其他分数使用上标数字 + 分数斜杠(⁄) + 下标数字显示</li>
+                    <li>例如：⁹⁄₁₀、³⁄₁₆ 等，看起来更像手写的竖式分数</li>
+                </ul>
+                <br>
+                <p><strong>功能特点：</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>自动识别 \frac{a}{b} 格式并转换为竖式分数</li>
+                    <li>自动转换 \div → ÷、\times → ×、\cdot → ·</li>
+                    <li>支持上标 ^{n} 和下标 _{n} 转换</li>
+                    <li>清除所有 LaTeX 标记，输出纯净文本</li>
+                    <li>三种输出格式可选</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="copyNotification" class="copy-notification">
+        ✓ 已复制到剪贴板
+    </div>
+
+    <script>
+        // Unicode 分数字符映射表
+        const unicodeFractions = {
+            '1/2': '½', '1/3': '⅓', '2/3': '⅔', '1/4': '¼', '3/4': '¾',
+            '1/5': '⅕', '2/5': '⅖', '3/5': '⅗', '4/5': '⅘',
+            '1/6': '⅙', '5/6': '⅚', '1/7': '⅐', '1/8': '⅛', '3/8': '⅜', '5/8': '⅝', '7/8': '⅞',
+            '1/9': '⅑', '1/10': '⅒'
+        };
+
+        // 上标数字映射
+        const superscripts = {
+            '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+            '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+        };
+
+        // 下标数字映射
+        const subscripts = {
+            '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+            '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
+        };
+
+        // 将数字转换为上标
+        function toSuperscript(num) {
+            return num.toString().split('').map(c => superscripts[c] || c).join('');
+        }
+
+        // 将数字转换为下标
+        function toSubscript(num) {
+            return num.toString().split('').map(c => subscripts[c] || c).join('');
+        }
+
+        // 将分数转换为竖式格式（使用上标/分数线/下标）
+        function toVerticalFraction(numerator, denominator) {
+            const fractionKey = `${numerator}/${denominator}`;
+            
+            // 如果有现成的 Unicode 分数字符，直接使用
+            if (unicodeFractions[fractionKey]) {
+                return unicodeFractions[fractionKey];
+            }
+            
+            // 否则使用上标+分数斜杠+下标来模拟竖式
+            return toSuperscript(numerator) + '⁄' + toSubscript(denominator);
+        }
+
+        function convertText() {
+            const input = document.getElementById('inputText').value;
+            const outputFormat = document.querySelector('input[name="outputFormat"]:checked').value;
+            
+            if (!input.trim()) {
+                alert('请输入要转换的文本！');
+                return;
+            }
+
+            let output = input;
+
+            if (outputFormat === 'vertical') {
+                // 竖式分数格式（主要格式）
+                // 处理 \(\frac{a}{b}\) 格式
+                output = output.replace(/\\\(\\frac\{([^}]+)\}\{([^}]+)\}\\\)/g, function(match, num, den) {
+                    return toVerticalFraction(num.trim(), den.trim());
+                });
+                
+                // 处理单独的 \frac{a}{b} 格式
+                output = output.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, function(match, num, den) {
+                    return toVerticalFraction(num.trim(), den.trim());
+                });
+
+                // 转换数学符号
+                output = output.replace(/\\div/g, '÷');
+                output = output.replace(/\\times/g, '×');
+                output = output.replace(/\\cdot/g, '·');
+                
+                // 清理 LaTeX 标记
+                output = output.replace(/\\\(/g, '');
+                output = output.replace(/\\\)/g, '');
+                output = output.replace(/\\/g, '');
+                
+            } else if (outputFormat === 'slash') {
+                // 斜杠格式
+                output = output.replace(/\\\(\\frac\{([^}]+)\}\{([^}]+)\}\\\)/g, '$1/$2');
+                output = output.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2');
+                output = output.replace(/\\div/g, '÷');
+                output = output.replace(/\\times/g, '×');
+                output = output.replace(/\\cdot/g, '×');
+                output = output.replace(/\\\(/g, '');
+                output = output.replace(/\\\)/g, '');
+                output = output.replace(/\\/g, '');
+                
+            } else if (outputFormat === 'latex') {
+                // LaTeX 格式
+                output = output.replace(/\\\(\\frac\{([^}]+)\}\{([^}]+)\}\\\)/g, '$\\frac{$1}{$2}$');
+                output = output.replace(/\\div/g, '÷');
+                output = output.replace(/\\times/g, '×');
+                output = output.replace(/\\cdot/g, '·');
+                output = output.replace(/\\\(/g, '$');
+                output = output.replace(/\\\)/g, '$');
+            }
+
+            // 处理上标和下标
+            output = output.replace(/\^{([^}]+)}/g, function(match, p1) {
+                return p1.split('').map(c => superscripts[c] || c).join('');
+            });
+            
+            output = output.replace(/_{([^}]+)}/g, function(match, p1) {
+                return p1.split('').map(c => subscripts[c] || c).join('');
+            });
+
+            document.getElementById('outputText').textContent = output;
+            
+            // 添加转换完成的动画效果
+            const outputPanel = document.getElementById('outputText').closest('.panel');
+            outputPanel.style.animation = 'none';
+            setTimeout(() => {
+                outputPanel.style.animation = 'scaleIn 0.4s ease-out';
+            }, 10);
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').textContent = '转换后的文本将显示在这里...';
+        }
+
+        function copyOutput() {
+            const outputText = document.getElementById('outputText').textContent;
+            
+            if (outputText === '转换后的文本将显示在这里...') {
+                alert('没有可复制的内容！');
+                return;
+            }
+
+            navigator.clipboard.writeText(outputText).then(() => {
+                showCopyNotification();
+            }).catch(err => {
+                console.error('复制失败：', err);
+                alert('复制失败，请手动复制！');
+            });
+        }
+
+        function showCopyNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // 支持 Enter 键快速转换（Ctrl+Enter）
+        document.getElementById('inputText').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                convertText();
+            }
+        });
+
+        // 自动转换功能（可选）
+        let autoConvertTimer;
+        document.getElementById('inputText').addEventListener('input', () => {
+            clearTimeout(autoConvertTimer);
+            autoConvertTimer = setTimeout(() => {
+                if (document.getElementById('inputText').value.trim()) {
+                    convertText();
+                }
+            }, 1000); // 1秒后自动转换
+        });
+    </script>
+</body>
+</html>
